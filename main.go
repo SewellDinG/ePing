@@ -40,23 +40,28 @@ func ePing(pingCount, pingHost string) error {
 
 func main() {
     // eping https://baidu.com:443/urlPath/index.html
+    var pingUrl string = os.Args[1]
     var pingCount string
     if len(os.Args) > 2 {
         fmt.Println("Please enter a parameter.")
         os.Exit(0)
     }
+    // get host: baidu.com
+    if !strings.HasPrefix(os.Args[1], "http") {
+        pingUrl = "http://" + os.Args[1]
+    }
+    pingUrlInfo, err := url.Parse(pingUrl)
+    if err != nil {
+        log.Fatal("url.Parse err:", err)
+    }
+    pingHost := strings.Split(pingUrlInfo.Host, ":")[0]
     // windows default ping 4 times
     if runtime.GOOS != "windows" {
         pingCount = "-c4"
     } else {
         pingCount = ""
     }
-    // get host: baidu.com
-    urls, err := url.Parse(os.Args[1])
-    if err != nil {
-        log.Fatal("url.Parse err:", err)
-    }
-    pingHost := strings.Split(urls.Host, ":")[0]
+    // exec command
     err = ePing(pingCount, pingHost)
     if err != nil {
         log.Fatal("func ePing err:", err)
